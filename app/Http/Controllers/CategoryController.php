@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -21,7 +22,7 @@ class CategoryController extends Controller
          }
     else
         {
-        return response()->json(['message'=>'No Category Found'], 404);
+        return response()->json(['message'=>'Категория не найдена!'], 404);
 }
     }
 
@@ -34,7 +35,7 @@ class CategoryController extends Controller
     $category = new Category;
     $category->name = $request->name;
     $category->save();
-    return response()->json(['message'=>'Category Added Successfully'], 200);
+    return response()->json(['message'=>'Категория успешно добавлена!'], 200);
 }
 
  public function update(Request $request, $id){
@@ -47,7 +48,7 @@ class CategoryController extends Controller
       if ($category){
      $category->name = $request->name;
      $category->update();
-     return response()->json(['message'=>'Category Updated Successfully'], 200);
+     return response()->json(['message'=>'Категория обновлена успешно!'], 200);
       }
       else{
           return response()->json(['message'=>'No Category Found'], 404);
@@ -59,10 +60,10 @@ class CategoryController extends Controller
         $category = Category::find($id);
         if ($category){
             $category->delete();
-            return response()->json(['message'=>'Category Deleted Successfully'], 200);
+            return response()->json(['message'=>'Категория успешно удалена'], 200);
         }
         else{
-            return response()->json(['message'=>'No Category Found'],404);
+            return response()->json(['message'=>'Категория не найдена'],404);
         }
  }
 

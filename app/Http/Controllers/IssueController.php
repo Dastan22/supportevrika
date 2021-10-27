@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Issue;
 use Illuminate\Http\Request;
 
@@ -14,14 +15,9 @@ class IssueController extends Controller
     }
 
     public function show($id){
-        $issues = Issue::find($id);
-        if ($issues){
-            return response()->json(['products'=>$issues], 200);
-        }
-        else{
-            return response()->json(['message'=>'No Product Found', 404]);
-        }
+        $issues = Issue::query()->findOrFail($id);
 
+        return response()->json(['products'=>$issues]);
     }
 
     public function  store(Request $request)
@@ -51,7 +47,7 @@ class IssueController extends Controller
         $issue->taken_at = $request->taken_at;
         $issue->category_id = $request->category_id;
         $issue->save();
-        return response()->json(['message'=> 'Issue Added Successfully'], 200);
+        return response()->json(['message'=> 'Проблема добавлена успешно!'], 200);
     }
 
     public function update(Request $request, $id)
@@ -82,11 +78,11 @@ class IssueController extends Controller
         $issue->taken_at = $request->taken_at;
         $issue->category_id = $request->category_id;
         $issue->update();
-        return response()->json(['message' => 'Issue Updated Successfully'], 200);
+        return response()->json(['message' => 'Проблема успешно обновлена'], 200);
         }
         else
         {
-            return response()->json(['message'=>'No Issue Found'], 404);
+            return response()->json(['message'=>'Товар не найден'], 404);
         }
     }
 
@@ -97,9 +93,9 @@ class IssueController extends Controller
 
         if($issue){
             $issue->delete();
-            return response()->json(['message' => 'Issue Deleted Successfully'], 200);
+            return response()->json(['message' => 'Проблема успешно удалена'], 200);
         }else{
-            return response()->json(['message'=> 'No Issue Found'], 404);
+            return response()->json(['message'=> 'Товар не найден'], 404);
       }
 
 

@@ -1,26 +1,35 @@
 <?php
 
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ProductController;
+
 use Illuminate\Http\Request;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\IssueController;
 
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
 
 
 
-Route::middleware('auth:sanctum')->group(function (){
+
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::post('login', [AuthController::class, 'login']);
+});
+
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::post("/users", [AuthController::class, 'logout']);
+});
+
+
+
+Route::group(['middleware' => ['auth:sanctum', 'admin']], function() {
 
     Route::post('logout', [AuthController::class,'logout']);
 
     Route::get('issues',[IssueController::class, 'index']);
-    Route::get('issue/{id}/show',[IssueController::class, 'show']);
+    Route::get('issue/{id}',[IssueController::class, 'show']);
     Route::post('issue/add',[IssueController::class, 'store']);
     Route::post('issue/{id}/update', [IssueController::class, 'update']);
     Route::delete('issue/{id}/delete', [IssueController::class, 'destroy']);
@@ -37,7 +46,9 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::post('status/{id}/update', [StatusController::class, 'update']);
     Route::delete('status/{id}/delete',[StatusController::class,'destroy']);
 
-
+    Route::group(['middleware' => 'auth:sanctum'], function() {
+        Route::post('register', [AuthController::class, 'register']);
+    });
 
 
 
@@ -46,9 +57,4 @@ Route::middleware('auth:sanctum')->group(function (){
 
 
 
-
-//Route::apiResources([
-//    'desks' => DeskController::class,
-//
-//]);
 

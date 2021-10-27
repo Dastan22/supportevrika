@@ -14,6 +14,7 @@ class AuthController extends Controller
          'name'=>'required|string|max:191',
          'email'=>'required|email|max:191|unique:users,email',
          'password'=>'required|string',
+//
      ]);
 
      $user = User::create([
@@ -33,7 +34,7 @@ class AuthController extends Controller
 
  public function logout(){
      auth()->user()->tokens()->delete();
-     return response(['message'=>'Logged Out Successfully']);
+     return response(['message'=>'Выход успешно выполнен']);
  }
 
     public function login(Request $request){
@@ -42,14 +43,15 @@ class AuthController extends Controller
         'password' => 'required|string',
      ]);
 
-     $user = User::where('email', $data['email'])->first();
+     $user = User::query()->where('email', $data['email'])->first();
 
      if(!$user || !Hash::check($data['password'], $user->password)){
 
-         return response(['message'=> 'Invalid Credentials'], 401);
+         return response(['message'=> 'Неверные учетные данные'], 401);
          }
      else{
          $token = $user->createToken('fundaProjectTokenLogin')->plainTextToken;
+         $user->load('roles');
          $response = [
              'user'=>  $user,
              'token'=> $token,

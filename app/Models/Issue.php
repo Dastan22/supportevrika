@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Issue extends Model
 {
     use HasFactory;
+
+    const TYPE_NEW = 0;
+    const TYPE_PERFORMED= 1;
+    const TYPE_DURING=2;
+
+    public function getTypeNameAttribute (): string{
+        return match($this->attributes['type'] ?? null) {
+            self::TYPE_NEW => 'Новая',
+            self::TYPE_PERFORMED => 'Выполненная',
+            self::TYPE_DURING => 'Выполняемая',
+        };
+    }
+
     protected $table = 'issues';
     protected $fillable = [
         'initiator_name',
