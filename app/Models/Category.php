@@ -13,4 +13,9 @@ class Category extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function issues()
+    {
+        return $this->hasMany(Issue::class, 'category_id');
+    }
 }

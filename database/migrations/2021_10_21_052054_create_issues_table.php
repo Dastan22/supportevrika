@@ -17,13 +17,15 @@ class CreateIssuesTable extends Migration
             $table->id();
             $table->string('initiator_name');
             $table->string('text');
-            $table->string('image_src');
             $table->string('initiator_contact');
+            $table->tinyInteger('status');
             $table->string('initiator_anydesk');
-            $table->foreignId('dispatcher_id')->constrained("users");
-            $table->foreignId('category_id')->constrained();
-            $table->timestamp('taken_at')->useCurrent();
+            $table->foreignId('dispatcher_id')->nullable()->constrained("users");
+            $table->foreignId('category_id')->nullable()->constrained();
+            $table->timestamp('taken_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
+
         });
     }
 

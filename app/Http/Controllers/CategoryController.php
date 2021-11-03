@@ -28,44 +28,39 @@ class CategoryController extends Controller
 
     public function  store(Request $request)
     {
-        $request->validate([
-        'name'=>'required|max:191',
-    ]);
+        $this->middleware('admin');
 
-    $category = new Category;
-    $category->name = $request->name;
-    $category->save();
-    return response()->json(['message'=>'Категория успешно добавлена!'], 200);
+        $attributes = $request->validate([
+            'name' => 'required|unique:categories|max:100',
+        ]);
+
+        if(Category::create($attributes))
+        {
+            return response('Success', 201);
+        }
+
+
+
 }
 
- public function update(Request $request, $id){
+ public function update(Request $request, Category $category){
 
-     $request->validate([
-         'name'=>'required|max:191',
+     $this->middleware('admin');
+
+     $attributes = $request->validate([
+         'name' => 'required|unique:categories|max:100'
      ]);
 
-     $category = Category::find($id);
-      if ($category){
-     $category->name = $request->name;
-     $category->update();
-     return response()->json(['message'=>'Категория обновлена успешно!'], 200);
-      }
-      else{
-          return response()->json(['message'=>'No Category Found'], 404);
-      }
+     $category->update($attributes);
+     return response('Success', 201);
 
  }
 
- public function destroy($id){
-        $category = Category::find($id);
-        if ($category){
-            $category->delete();
-            return response()->json(['message'=>'Категория успешно удалена'], 200);
-        }
-        else{
-            return response()->json(['message'=>'Категория не найдена'],404);
-        }
- }
+ public function destroy(Category $category){
+     $this->middleware('admin');
 
-
+     if(Category::destroy($category->id)) {
+         return response('Success', 201);
+     }
+   }
 }

@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->boolean("is_admin")->default(false);
+            $table->foreignId('worker_id')->nullable()->constrained();
             $table->rememberToken();
             $table->timestamps();
         });
