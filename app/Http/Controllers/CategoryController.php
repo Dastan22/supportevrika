@@ -28,7 +28,7 @@ class CategoryController extends Controller
 
     public function  store(Request $request)
     {
-        $this->middleware('admin');
+
 
         $attributes = $request->validate([
             'name' => 'required|unique:categories|max:100',
@@ -45,7 +45,7 @@ class CategoryController extends Controller
 
  public function update(Request $request, Category $category){
 
-     $this->middleware('admin');
+
 
      $attributes = $request->validate([
          'name' => 'required|unique:categories|max:100'
@@ -57,7 +57,7 @@ class CategoryController extends Controller
  }
 
  public function destroy(Category $category){
-     $this->middleware('admin');
+
 
      if(Category::destroy($category->id)) {
          return response('Success', 201);

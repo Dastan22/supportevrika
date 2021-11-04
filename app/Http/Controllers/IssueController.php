@@ -6,8 +6,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\IssueResource;
 use App\Models\Issue;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -128,18 +130,63 @@ class IssueController extends Controller
 
     public function beginWork(Request $request, Issue $issue)
     {
-        $this->validate($request, [
-            'status' => 'required|in:0,2'
-        ]);
+//        $this->validate($request, [
+//            'status' => 'required|in:0,2'
+//        ]);
 
-        if ( $issue->status == Issue::STATUS_TYPE_DURING ) {
-            $issue->update([
-                'taken_at' => now('Asia/Almaty'),
-            ]);
+
+        if( $issue->status == 1){
+            $issue->status = 2;
+            $issue->user()->associate(auth()->user());
+            $issue->save();}
+
+            if ( $issue->status == Issue::STATUS_TYPE_DURING ) {
+                $issue->update([
+                    'taken_at' => now('Asia/Almaty'),
+                ]);
+            }
+
+            return response('You have attached the problem to this dispatcher!', 200);
+//        return new IssueResource($issue);
+    }
+
+    public  function returnIssue(Request $request, Issue $issue){
+
+        return [
+            'user'=>auth()->user(),
+            'issue'=>$issue,
+            'issue_user'=>$issue->user,
+        ];
+
+       if($issue->user->id != auth()->user()->id){
+           abort(403, 'Unauthorized');
+       }
+
+        if($issue->status == 2) {
+            $issue->status = 1;
+            $issue->user()->dissociate($user);
+            $issue->save();
+            return response('You returned issue!', 200);
+        }
+        else {
+            return response('Something went wrong', 400);
         }
 
-        $issue->update(['status' => $request->status]);
-
-        return new IssueResource($issue);
     }
+
+
+    public  function completeIssue(Request $request, Issue $issue){
+
+if( $issue->status == 1 || $issue->status == 2){
+    $issue->status = 0;
+    $issue->save();
+    return response('You completed issue completing!', 200);
+}
+
+
+    }
+
+
+
+
 }

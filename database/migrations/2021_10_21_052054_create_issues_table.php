@@ -20,8 +20,8 @@ class CreateIssuesTable extends Migration
             $table->string('initiator_contact');
             $table->tinyInteger('status');
             $table->string('initiator_anydesk');
-            $table->foreignId('dispatcher_id')->nullable()->constrained("users");
-            $table->foreignId('category_id')->nullable()->constrained();
+            $table->foreignId('user_id')->nullable()->constrained("users");
+            $table->foreignId('category_id')->nullable()->constrained("categories");
             $table->timestamp('taken_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

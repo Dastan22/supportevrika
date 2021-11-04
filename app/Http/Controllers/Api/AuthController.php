@@ -51,7 +51,7 @@ class AuthController extends Controller
          }
      else{
          $token = $user->createToken('fundaProjectTokenLogin')->plainTextToken;
-         $user->load('roles');
+//         $user->load('roles');
          $response = [
              'user'=>  $user,
              'token'=> $token,

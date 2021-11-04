@@ -6,14 +6,15 @@ use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\UserController;
 
 
-//    Route::post('register', [AuthController::class, 'register']);
-//    Route::post('/login', [AuthController::class, 'login'])->name('login');
+   Route::post('register', [AuthController::class, 'register']);
+   Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 
     Route::group(['middleware' => ['auth:sanctum']], function() {
-       Route::post('login', [AuthController::class, 'login']);
+//       Route::post('login', [AuthController::class, 'login']);
     });
 
     Route::group(['middleware' => 'auth:sanctum'], function() {
@@ -24,8 +25,7 @@ use App\Http\Controllers\IssueController;
 
 
 
-
-    Route::group(['middleware' => ['auth:sanctum', 'admin']], function() {
+    Route::group(['middleware' => ['auth:sanctum']], function() {
 
       Route::post('logout', [AuthController::class,'logout']);
 
@@ -35,9 +35,8 @@ use App\Http\Controllers\IssueController;
       Route::put('issue/{issue}', [IssueController::class, 'update']);
       Route::delete('issue/{issue}', [IssueController::class, 'destroy']);
       Route::post('issue/{issue}/take-job', [IssueController::class, 'beginWork']);
-
-
-
+      Route::post('/issue/{issue}/return', [IssueController::class, 'returnIssue']);
+      Route::post('/issue/{issue}/complete', [IssueController::class, 'completeIssue']);
 
 
 

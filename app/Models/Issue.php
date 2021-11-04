@@ -22,7 +22,7 @@ class Issue extends Model
         'initiator_contact',
         'status',
         'initiator_anydesk',
-        'dispatcher_id',
+        'user_id',
         'category_id',
         'taken_at',
     ];
@@ -69,8 +69,8 @@ class Issue extends Model
         return $this->hasMany(Image::class);
     }
 
-    public function updateHistory(){
-
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 
 
