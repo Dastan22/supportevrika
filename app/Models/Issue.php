@@ -59,10 +59,14 @@ class Issue extends Model
         } );
 
         $query->when($filters['category_id'] ?? false, function($query, $category_id){
-            $query->where('category_id', $category_id);
+            $query->whereHas('category', fn($q) => $q->where('id', $category_id));
         } );
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function images()
     {

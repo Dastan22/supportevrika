@@ -1,61 +1,78 @@
 <?php
 
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\CategoryController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+
+//        PUBLIC ROUTES
+Route::post('login', [AuthController::class, 'login']);
+Route::post('logout', [AuthController::class, 'logout']);
+Route::post('register', [AuthController::class, 'register']);
+
+// ISSUES
+Route::apiResource('issues', IssueController::class);
+// USERS
+Route::apiResource('users', UserController::class)->middleware(['auth:sanctum' ,'admin']);
 
 
-   Route::post('register', [AuthController::class, 'register']);
-   Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    // CATEGORIES
+    Route::apiResource('categories', CategoryController::class);
 
+    // USER's ISSUE MANIPULATIONS
+    Route::get('users/{user}/issues', [IssueController::class, 'myIssues']);
+    Route::put('users/{user}/issues/{issue}/takeJob', [IssueController::class, 'takeJob']);
+    Route::put('users/{user}/issues/{issue}/return', [IssueController::class, 'return']);
+    Route::put('users/{user}/issues/{issue}/complete', [IssueController::class, 'complete']);
 
-    Route::group(['middleware' => ['auth:sanctum']], function() {
-//       Route::post('login', [AuthController::class, 'login']);
-    });
-
-    Route::group(['middleware' => 'auth:sanctum'], function() {
-      Route::post("/users", [AuthController::class, 'logout']);
-    });
-
-      Route::post('issue/add',[IssueController::class, 'store']);
-
-
-
-    Route::group(['middleware' => ['auth:sanctum']], function() {
-
-      Route::post('logout', [AuthController::class,'logout']);
-
-      Route::get('issues',[IssueController::class, 'index']);
-      Route::get('issue/{id}',[IssueController::class, 'show']);
-      Route::post('issue/add',[IssueController::class, 'store']);
-      Route::put('issue/{issue}', [IssueController::class, 'update']);
-      Route::delete('issue/{issue}', [IssueController::class, 'destroy']);
-      Route::post('issue/{issue}/take-job', [IssueController::class, 'beginWork']);
-      Route::post('/issue/{issue}/return', [IssueController::class, 'returnIssue']);
-      Route::post('/issue/{issue}/complete', [IssueController::class, 'completeIssue']);
+});
 
 
 
-      Route::get('categories', [CategoryController::class, 'index']);
-      Route::get('category/{id}/show', [CategoryController::class, 'show']);
-      Route::post('category/add', [CategoryController::class, 'store']);
-      Route::put('category/{category}', [CategoryController::class, 'update']);
-      Route::delete('category/{id}', [CategoryController::class, 'destroy']);
 
 
 
-//      Route::apiResource('/categories', CategoryController::class);
-//    Route::group(['middleware' => 'auth:sanctum'], function() {
-//    Route::post('register', [AuthController::class, 'register']);
-//    });
 
 
 
-     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

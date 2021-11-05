@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\IssueResource;
 use App\Models\Issue;
 use App\Models\User;
+use Hamcrest\Core\Is;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
@@ -23,23 +24,41 @@ class IssueController extends Controller
 
     public function index(Request $request){
 
-        $status = $request->get('status') ?? Issue::STATUS_TYPE_NEW;
+//        $status = $request->get('status') ?? Issue::STATUS_TYPE_NEW;
+//        return response()->json(request(['date_after', 'date_before', 'search', 'status', 'category_id']));
 
         $issues = Issue::query()
             ->latest()
-            ->where('status', $status)
-            ->filter(request(['date_after', 'date_before', 'search', 'status', 'category_id']))
+//            ->with('category')
+            ->filter([
+                'date_after' => $request->date_after,
+                'date_before' => $request->date_before,
+                'search' => $request->search,
+                'status' => $request->status,
+                'category_id' => $request->category_id,
+            ])
             ->get();
+
+//        return response()->json($issues);
 
         return IssueResource::collection($issues);
     }
 
 
-    public function show(Issue $issue){
+    public function show($id){
 
-        return new IssueResource($issue->load('images'));
-
+        $issues = Issue::find($id);
+        if ($issues){
+            return response()->json(['issues'=>$issues], 200);
+        }
+        else
+        {
+            return response()->json(['message'=>'Категория не найдена!'], 404);
+        }
     }
+//        return new IssueResource($issue->load('images'));
+
+
 
     public function  store(Request $request)
     {
@@ -55,6 +74,7 @@ class IssueController extends Controller
             "*.exists" => "Данных нет"
         ]);
 
+//        return $request;
 
         $issue = Issue::query()->create([
             "initiator_name" => $request->initiator_name,
@@ -67,15 +87,12 @@ class IssueController extends Controller
 //            "taken_at" => $request->taken_at,
         ]);
 
+        foreach ($request->images as $image) {
+            $imageUrl = $this->saveImage($image);
 
-        if ( is_array($request->images) ) {
-            foreach ($request->images as $image) {
-                $imageUrl = $this->saveImage($image);
-
-                $issue->images()->create([
-                    'path' => $imageUrl,
-                ]);
-            }
+            $issue->images()->create([
+                'path' => $imageUrl,
+            ]);
         }
 
         return response()->json(['data' => $issue]);
@@ -89,7 +106,7 @@ class IssueController extends Controller
         $image = str_replace(' ', '+', $image);
         $imageName = Str::random(30).'.'.$extension;
 
-        $imageUrl = 'public/images'.$imageName;
+        $imageUrl = 'public/images/'.$imageName;
         Storage::disk()->put($imageUrl, base64_decode($image));
 
         return $imageUrl;
@@ -126,45 +143,57 @@ class IssueController extends Controller
         return response()->noContent();
     }
 
+    public function myIssues(User $user){
+        $issues = Issue::query()
+            ->where('user_id', $user->id)
+            ->get();
+        return IssueResource::collection($issues);
+    }
 
-
-    public function beginWork(Request $request, Issue $issue)
+    public function takeJob(User $user, Issue $issue)
     {
 //        $this->validate($request, [
 //            'status' => 'required|in:0,2'
 //        ]);
 
 
+
         if( $issue->status == 1){
             $issue->status = 2;
             $issue->user()->associate(auth()->user());
             $issue->save();}
+        elseif(auth()->user()->user){
+            $issue->user()->associate(auth()->user());
+        }
 
-            if ( $issue->status == Issue::STATUS_TYPE_DURING ) {
-                $issue->update([
-                    'taken_at' => now('Asia/Almaty'),
-                ]);
-            }
 
-            return response('You have attached the problem to this dispatcher!', 200);
-//        return new IssueResource($issue);
+
+
+        if ( $issue->status == Issue::STATUS_TYPE_DURING ) {
+            $issue->update([
+                'taken_at' => now('Asia/Almaty'),
+            ]);
+        }
+
+//        return response('You have attached the problem to this dispatcher!', 200);
+        return new IssueResource($issue);
     }
 
-    public  function returnIssue(Request $request, Issue $issue){
+    public  function return(Request $request, Issue $issue){
 
-        return [
-            'user'=>auth()->user(),
-            'issue'=>$issue,
-            'issue_user'=>$issue->user,
-        ];
+//        return [
+//            'user'=>auth()->user(),
+//            'issue'=>$issue,
+//            'issue_user'=>$issue->user,
+//        ];
 
-       if($issue->user->id != auth()->user()->id){
-           abort(403, 'Unauthorized');
-       }
+        if($issue->user->id != auth()->user()->id){
+            abort(403, 'Unauthorized');
+        }
 
         if($issue->status == 2) {
             $issue->status = 1;
-            $issue->user()->dissociate($user);
+//            $issue->user()->dissociate($user);
             $issue->save();
             return response('You returned issue!', 200);
         }
@@ -175,18 +204,15 @@ class IssueController extends Controller
     }
 
 
-    public  function completeIssue(Request $request, Issue $issue){
+    public function complete(Request $request, Issue $issue)
+    {
 
-if( $issue->status == 1 || $issue->status == 2){
-    $issue->status = 0;
-    $issue->save();
-    return response('You completed issue completing!', 200);
-}
+        if ($issue->status == 1 || $issue->status == 2) {
+            $issue->status = 0;
+            $issue->save();
+            return response('You completed issue completing!', 200);
+        }
 
 
     }
-
-
-
-
 }

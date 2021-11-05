@@ -10,7 +10,8 @@ class UserController extends Controller
 {
     public function index()
     {
-        return User::where('is_admin','0')->paginate(15);
+//        return User::where('is_admin','0')->paginate(15);
+        return UserResource::collection(User::where('is_admin','0')->paginate(15));
     }
 
 
@@ -23,6 +24,11 @@ class UserController extends Controller
             'password' => 'required|password'
         ]);
 
+        if($request->is_admin==1){
+            $attributes['is_admin'] = 1;
+            $admin = User::create($attributes);
+            return new UserResource($admin);
+        }
         $attributes['password'] = bcrypt($request->password);
         $dispatcher = User::create($attributes);
         return new UserResource($dispatcher);

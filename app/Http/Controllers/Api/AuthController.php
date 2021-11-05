@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
  public function register(Request  $request){
+
+//     dd($request);
+
      $data = $request->validate([
          'name'=>'required|string|max:191',
          'email'=>'required|email|max:191|unique:users,email',
@@ -21,6 +24,7 @@ class AuthController extends Controller
          'name' =>$data['name'],
          'email'=> $data['email'],
          'password'=>Hash::make($data['password']),
+
      ]);
 
      $token = $user->createToken('fundaProjectToken')->plainTextToken;
@@ -42,6 +46,7 @@ class AuthController extends Controller
         'email' => 'required|email|max:191',
         'password' => 'required|string',
      ]);
+
 
      $user = User::query()->where('email', $data['email'])->first();
 
