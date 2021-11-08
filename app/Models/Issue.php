@@ -27,40 +27,42 @@ class Issue extends Model
         'taken_at',
     ];
 
-    public function getStatusTypeNameAttribute (): string
+    public function getStatusTypeNameAttribute(): string
     {
         switch ($this->attributes['status'] ?? null) {
-            case self::STATUS_TYPE_NEW: return "Новая";
-            case self::STATUS_TYPE_PERFORMED: return "Выполненная";
-            case self::STATUS_TYPE_DURING: return "Выполняемая";
-            default: return 'Not found';
+            case self::STATUS_TYPE_NEW:
+                return "Новая";
+            case self::STATUS_TYPE_PERFORMED:
+                return "Выполненная";
+            case self::STATUS_TYPE_DURING:
+                return "Выполняемая";
+            default:
+                return 'Not found';
         }
     }
 
     public function scopeFilter($query, array $filters)
     {
-        $query->when($filters['date_after'] ?? false, function($query, $date_after){
+        $query->when($filters['date_after'] ?? false, function ($query, $date_after) {
             $query->whereDate('created_at', '>=', $date_after);
-        } );
+        });
 
-        $query->when($filters['date_before'] ?? false, function($query, $date_before){
+        $query->when($filters['date_before'] ?? false, function ($query, $date_before) {
             $query->whereDate('created_at', '<=', $date_before);
-        } );
+        });
 
-        $query->when($filters['search'] ?? false, fn($query, $search) =>
-        $query->where(fn($query) =>
-        $query->where('text', 'like', '%'. $search .'%')
-            ->orWhere('initiator_name', 'like', '%'. $search .'%')
+        $query->when($filters['search'] ?? false, fn($query, $search) => $query->where(fn($query) => $query->where('text', 'like', '%' . $search . '%')
+            ->orWhere('initiator_name', 'like', '%' . $search . '%')
         )
         );
 
-        $query->when($filters['status'] ?? false, function($query, $status){
+        $query->when($filters['status'] ?? false, function ($query, $status) {
             $query->where('status', $status);
-        } );
+        });
 
-        $query->when($filters['category_id'] ?? false, function($query, $category_id){
+        $query->when($filters['category_id'] ?? false, function ($query, $category_id) {
             $query->whereHas('category', fn($q) => $q->where('id', $category_id));
-        } );
+        });
     }
 
     public function category()
@@ -73,11 +75,10 @@ class Issue extends Model
         return $this->hasMany(Image::class);
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
-
-
 
 
 }

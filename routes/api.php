@@ -15,10 +15,10 @@ Route::post('register', [AuthController::class, 'register']);
 // ISSUES
 Route::apiResource('issues', IssueController::class);
 // USERS
-Route::apiResource('users', UserController::class)->middleware(['auth:sanctum' ,'admin']);
+Route::apiResource('users', UserController::class)->middleware(['auth:sanctum', 'admin']);
 
 
-Route::group(['middleware' => 'auth:sanctum'], function() {
+Route::group(['middleware' => 'auth:sanctum'], function () {
     // CATEGORIES
     Route::apiResource('categories', CategoryController::class);
 

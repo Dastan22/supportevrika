@@ -11,20 +11,19 @@ class UserController extends Controller
     public function index()
     {
 //        return User::where('is_admin','0')->paginate(15);
-        return UserResource::collection(User::where('is_admin','0')->paginate(15));
+        return UserResource::collection(User::where('is_admin', '0')->paginate(15));
     }
 
 
     public function store(Request $request)
     {
-
         $attributes = $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|password'
         ]);
 
-        if($request->is_admin==1){
+        if ($request->is_admin == 1) {
             $attributes['is_admin'] = 1;
             $admin = User::create($attributes);
             return new UserResource($admin);
@@ -34,16 +33,16 @@ class UserController extends Controller
         return new UserResource($dispatcher);
     }
 
-    public function show(User $dispatcher)
+    public function show(User $user)
     {
         // return view('issue', [
         //     'issue' => $issue,
         //     'issue_status' => $issue->status
         // ]);
-        return $dispatcher;
+        return $user;
     }
 
-    public function update(Request $request, User $dispatcher)
+    public function update(Request $request, User $user)
     {
         $attributes = $request->validate([
             'name' => 'required|max:255',
@@ -52,14 +51,13 @@ class UserController extends Controller
         ]);
 
         $attributes['password'] = bcrypt($request->password);
-        $dispatcher->update($attributes);
+        $user->update($attributes);
         return response('Success', 200);
     }
 
-    public function destroy(User $dispatcher)
+    public function destroy(User $user)
     {
-        if(User::destroy($dispatcher->id))
-        {
+        if (User::destroy($user->id)) {
             return response('Success', 200);
         }
 

@@ -22,7 +22,8 @@ class IssueController extends Controller
 //    @Get
 //    __BASE_URL__/api/issues?status=1
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
 //        $status = $request->get('status') ?? Issue::STATUS_TYPE_NEW;
 //        return response()->json(request(['date_after', 'date_before', 'search', 'status', 'category_id']));
@@ -45,47 +46,32 @@ class IssueController extends Controller
     }
 
 
-    public function show($id){
+    public function show($id)
+    {
 
         $issues = Issue::find($id);
-        if ($issues){
-            return response()->json(['issues'=>$issues], 200);
-        }
-        else
-        {
-            return response()->json(['message'=>'Категория не найдена!'], 404);
+        if ($issues) {
+            return response()->json(['issues' => $issues], 200);
+        } else {
+            return response()->json(['message' => 'Категория не найдена!'], 404);
         }
     }
+
 //        return new IssueResource($issue->load('images'));
 
 
-
-    public function  store(Request $request)
+    public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'initiator_name'=>'required|max:21',
-            'text'=>'required|max:191',
-            'initiator_contact'=>'required|max:11',
-            'initiator_anydesk'=>'required|max:11',
-//            'dispatcher_id'=>'required|exists:users,id',
-//            'category_id'=>'required|max:21',
-//            'taken_at'=>'required|max:21',
-        ], [
-            "*.exists" => "Данных нет"
+        $attributes = $this->validate($request, [
+            'initiator_name' => 'required|max:255',
+            'text' => 'required|max:255',
+            'initiator_contact' => 'required|max:255',
+            'initiator_anydesk' => 'required|max:255',
+            'images' => 'array'
         ]);
 
-//        return $request;
-
-        $issue = Issue::query()->create([
-            "initiator_name" => $request->initiator_name,
-            "text" => $request->text,
-            "initiator_contact" => $request->initiator_contact,
-            "status" => 1,
-            "initiator_anydesk" => $request->initiator_anydesk,
-//            "dispatcher_id" => $request->dispatcher_id,
-//            "category_id" => $request->category_id,
-//            "taken_at" => $request->taken_at,
-        ]);
+        $attributes['status'] = 1;
+        $issue = Issue::query()->create($attributes);
 
         foreach ($request->images as $image) {
             $imageUrl = $this->saveImage($image);
@@ -95,18 +81,19 @@ class IssueController extends Controller
             ]);
         }
 
-        return response()->json(['data' => $issue]);
+        return response()->json(['data' => $issue->load('images')]);
     }
 
-    public function saveImage ($base64) {
+    public function saveImage($base64)
+    {
         $image_64 = $base64; //base64 encoded data
         $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png .pdf
-        $replace = substr($image_64, 0, strpos($image_64, ',')+1);
+        $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
         $image = str_replace($replace, '', $image_64);
         $image = str_replace(' ', '+', $image);
-        $imageName = Str::random(30).'.'.$extension;
+        $imageName = Str::random(30) . '.' . $extension;
 
-        $imageUrl = 'public/images/'.$imageName;
+        $imageUrl = 'public/images/' . $imageName;
         Storage::disk()->put($imageUrl, base64_decode($image));
 
         return $imageUrl;
@@ -128,22 +115,24 @@ class IssueController extends Controller
         ]);
 
 
-            $issue->initiator_name = $request->initiator_name;
-            $issue->text = $request->text;
-            $issue->initiator_contact = $request->initiator_contact;
-            $issue->initiator_anydesk = $request->initiator_anydesk;
+        $issue->initiator_name = $request->initiator_name;
+        $issue->text = $request->text;
+        $issue->initiator_contact = $request->initiator_contact;
+        $issue->initiator_anydesk = $request->initiator_anydesk;
 
-            $issue->update();
-            return response()->json(['message' => 'Проблема успешно обновлена'], 200);
+        $issue->update();
+        return response()->json(['message' => 'Проблема успешно обновлена'], 200);
     }
 
 
-    public function destroy(Issue $issue){
+    public function destroy(Issue $issue)
+    {
         $issue->delete();
         return response()->noContent();
     }
 
-    public function myIssues(User $user){
+    public function myIssues(User $user)
+    {
         $issues = Issue::query()
             ->where('user_id', $user->id)
             ->get();
@@ -152,24 +141,16 @@ class IssueController extends Controller
 
     public function takeJob(User $user, Issue $issue)
     {
-//        $this->validate($request, [
-//            'status' => 'required|in:0,2'
-//        ]);
-
-
-
-        if( $issue->status == 1){
+        if ($issue->status == 1) {
             $issue->status = 2;
             $issue->user()->associate(auth()->user());
-            $issue->save();}
-        elseif(auth()->user()->user){
-            $issue->user()->associate(auth()->user());
+            $issue->save();
+        } else {
+            return 'This work is in progress, choose another';
         }
 
 
-
-
-        if ( $issue->status == Issue::STATUS_TYPE_DURING ) {
+        if ($issue->status == Issue::STATUS_TYPE_DURING) {
             $issue->update([
                 'taken_at' => now('Asia/Almaty'),
             ]);
@@ -179,7 +160,8 @@ class IssueController extends Controller
         return new IssueResource($issue);
     }
 
-    public  function return(Request $request, Issue $issue){
+    public function return(User $user, Issue $issue)
+    {
 
 //        return [
 //            'user'=>auth()->user(),
@@ -187,30 +169,29 @@ class IssueController extends Controller
 //            'issue_user'=>$issue->user,
 //        ];
 
-        if($issue->user->id != auth()->user()->id){
-            abort(403, 'Unauthorized');
-        }
+//        if($issue->user->id != auth()->user()->id){
+//            abort(403, 'Unauthorized');
+//        }
 
-        if($issue->status == 2) {
+        if ($issue->status == 2 || $issue->status == 0) {
             $issue->status = 1;
 //            $issue->user()->dissociate($user);
             $issue->save();
             return response('You returned issue!', 200);
-        }
-        else {
+        } else {
             return response('Something went wrong', 400);
         }
 
     }
 
 
-    public function complete(Request $request, Issue $issue)
+    public function complete(User $user, Issue $issue)
     {
 
         if ($issue->status == 1 || $issue->status == 2) {
             $issue->status = 0;
             $issue->save();
-            return response('You completed issue completing!', 200);
+            return response('You completed the problem successfully!', 200);
         }
 
 
