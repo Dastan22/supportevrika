@@ -12,7 +12,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return response()->json(['categories' => $categories], 200);
+        return response()->json(['categories' => $categories], 201);
     }
 
 
@@ -20,9 +20,9 @@ class CategoryController extends Controller
     {
         $categories = Category::find($id);
         if ($categories) {
-            return response()->json(['categories' => $categories], 200);
+            return response()->json(['categories' => $categories], 201);
         } else {
-            return response()->json(['message' => 'Категория не найдена!'], 404);
+            return response()->json(['message' => 'Category not found!'], 404);
         }
     }
 
@@ -35,7 +35,7 @@ class CategoryController extends Controller
         ]);
 
         if (Category::create($attributes)) {
-            return response('Success', 201);
+            return response()->json(['message'=>'Category successfully created'], 201);
         }
 
 
@@ -50,7 +50,7 @@ class CategoryController extends Controller
         ]);
 
         $category->update($attributes);
-        return response('Success', 201);
+        return response()->json(['message'=>'Category successfully updated'], 201);
 
     }
 
@@ -59,7 +59,7 @@ class CategoryController extends Controller
 
 
         if (Category::destroy($category->id)) {
-            return response('Success', 201);
+            return response()->json(['message'=>'Category successfully completed'], 201);
         }
     }
 }

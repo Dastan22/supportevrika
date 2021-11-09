@@ -24,9 +24,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     // USER's ISSUE MANIPULATIONS
     Route::get('users/{user}/issues', [IssueController::class, 'myIssues']);
-    Route::put('users/{user}/issues/{issue}/takeJob', [IssueController::class, 'takeJob']);
-    Route::put('users/{user}/issues/{issue}/return', [IssueController::class, 'return']);
-    Route::put('users/{user}/issues/{issue}/complete', [IssueController::class, 'complete']);
+    Route::put('issues/{issue}/takeJob', [IssueController::class, 'takeJob']);
+    Route::put('issues/{issue}/return', [IssueController::class, 'return']);
+    Route::put('issues/{issue}/complete', [IssueController::class, 'complete']);
 
 });
 

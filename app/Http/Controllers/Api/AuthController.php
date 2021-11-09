@@ -40,7 +40,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth()->user()->tokens()->delete();
-        return response(['message' => 'Выход успешно выполнен']);
+        return response()->json(['message' => 'Logged out successfully'], 201);
     }
 
     public function login(Request $request)
@@ -55,7 +55,7 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
 
-            return response(['message' => 'Неверные учетные данные'], 401);
+            return response()->json(['message' => 'Неверные учетные данные'], 401);
         } else {
             $token = $user->createToken('fundaProjectTokenLogin')->plainTextToken;
 //         $user->load('roles');

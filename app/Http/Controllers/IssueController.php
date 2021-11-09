@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 
 
 class IssueController extends Controller
@@ -53,7 +54,7 @@ class IssueController extends Controller
         if ($issues) {
             return response()->json(['issues' => $issues], 200);
         } else {
-            return response()->json(['message' => 'Категория не найдена!'], 404);
+            return response()->json(['message' => 'Category not found!'], 404);
         }
     }
 
@@ -121,14 +122,14 @@ class IssueController extends Controller
         $issue->initiator_anydesk = $request->initiator_anydesk;
 
         $issue->update();
-        return response()->json(['message' => 'Проблема успешно обновлена'], 200);
+        return response()->json(['message' => 'Problem updated successfully'], 201);
     }
 
 
     public function destroy(Issue $issue)
     {
         $issue->delete();
-        return response()->noContent();
+        return response()->json(['message' => 'Problem removed successfully'], 201);
     }
 
     public function myIssues(User $user)
@@ -146,7 +147,7 @@ class IssueController extends Controller
             $issue->user()->associate(auth()->user());
             $issue->save();
         } else {
-            return 'This work is in progress, choose another';
+            throw new \Exception("This work is in progress, choose another");
         }
 
 
@@ -162,37 +163,43 @@ class IssueController extends Controller
 
     public function return(User $user, Issue $issue)
     {
-
-//        return [
-//            'user'=>auth()->user(),
-//            'issue'=>$issue,
-//            'issue_user'=>$issue->user,
-//        ];
-
-//        if($issue->user->id != auth()->user()->id){
-//            abort(403, 'Unauthorized');
-//        }
-
-        if ($issue->status == 2 || $issue->status == 0) {
-            $issue->status = 1;
-//            $issue->user()->dissociate($user);
-            $issue->save();
-            return response('You returned issue!', 200);
-        } else {
-            return response('Something went wrong', 400);
+        if(!auth()->user()->is_admin && $issue->user_id != auth()->user()->id)
+        {
+            throw new AccessDeniedException();
         }
+
+        $issue->user_id = null;
+        $issue->taken_at = null;
+        $issue->status = 1;
+        $issue->save();
+
+        return response('You returned this problem successfully!', 200);
+
+
 
     }
 
 
     public function complete(User $user, Issue $issue)
     {
-
-        if ($issue->status == 1 || $issue->status == 2) {
-            $issue->status = 0;
-            $issue->save();
-            return response('You completed the problem successfully!', 200);
+        if(!auth()->user()->is_admin && $issue->user_id != auth()->user()->id)
+        {
+            throw new AccessDeniedException();
         }
+
+        if (!$issue->user_id && !auth()->user()->is_admin ){
+            throw new \Exception("Диспетчеру ISSUE  не присвоен ");
+        }
+
+
+//        $issue->user_id = null;
+        $issue->taken_at = null;
+        $issue->status = 0;
+        $issue->save();
+
+
+            return response('You completed this problem successfully!', 200);
+
 
 
     }

@@ -21,6 +21,7 @@ class IssueResource extends JsonResource
             'images_src' => ImageResource::collection($this->images),
             'initiator_contact' => $this->initiator_contact,
             'initiator_anydesk' => $this->initiator_anydesk,
+            'user_id' => $this->user_id,
             'status' => $this->status,
             'status_type_name' => $this->status_type_name,
             'taken_at' => $this->taken_at,
